@@ -13,12 +13,13 @@ namespace FrequentBreaker
     public partial class MainForm : Form
     {
         private bool enabled = false;
-        public int quickBreakDuration = 1 * 1000; // milliseconds
-        private int quickBreakInterval = 4 * 1000; // milliseconds
-        public int breakDuration = 3 * 1000; // milliseconds
-        private int breakInterval = 10 * 1000;// milliseconds
+        public int quickBreakDuration = 60 * 1000; // milliseconds
+        private int quickBreakInterval = 12 * 60 * 1000; // milliseconds
 
-        public int idleBeforeBreak = 2 * 1000; // milliseconds
+        public int breakDuration = 10 * 60 * 1000; // milliseconds
+        private int breakInterval = 55 * 60 * 1000;// milliseconds
+
+        public int idleBeforeBreak = 5 * 1000; // milliseconds
 
 
         QuickBreakForm quickBreakForm;
@@ -49,17 +50,18 @@ namespace FrequentBreaker
         private void quickBreakTimer_Tick(object sender, EventArgs e)
         {
             quickBreakForm.attemptStartQuickBreak();
-            pause();
+            stopQBTimers();
        }
 
         private void breakTimer_Tick(object sender, EventArgs e)
         {
             breakForm.attemptStartBreak();
-            pause();
+            stopQBTimers();
+            stopBTimers();
         }
 
         public void log(string s){
-            textBox1.AppendText(s+"\n");
+            textBox1.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + s + "\r\n");
         }
 
         private void disableToolStripMenuItem_Click(object sender, EventArgs e)
@@ -80,7 +82,7 @@ namespace FrequentBreaker
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Application.Exit();
         }
 
         private void showMainToolStripMenuItem_Click(object sender, EventArgs e)
@@ -89,6 +91,7 @@ namespace FrequentBreaker
             WindowState = FormWindowState.Normal;
         }
 
+        // enable breaking
         public void enable()
         {
             log("Starting main timers.");
@@ -96,8 +99,10 @@ namespace FrequentBreaker
             quickBreakTimer.Start();
             quickBreakResetTimer.Start();
             breakTimer.Start();
+            breakResetTimer.Start();
         }
 
+        // disable breaking
         public void disable()
         {
             log("Disabling main timers.");
@@ -105,26 +110,99 @@ namespace FrequentBreaker
             quickBreakTimer.Stop();
             quickBreakResetTimer.Stop();
             breakTimer.Stop();
+            breakResetTimer.Stop();
         }
 
-        public void pause(){
-            log("Pausing main timers.");
-            quickBreakTimer.Enabled = false;
-            quickBreakResetTimer.Enabled = false;
-            breakTimer.Enabled = false;
+
+        // stop quick break timers
+        public void stopQBTimers(){
+            log("Stopping quick break timers.");
+            quickBreakTimer.Stop();
+            quickBreakResetTimer.Stop();
         }
 
-        public void resume()
+
+        // start quick break timers
+        public void startQBTimers()
         {
             if (enabled)
             {
-                log("Resuming main timers.");
-                quickBreakTimer.Enabled = true;
-                quickBreakResetTimer.Enabled = true;
-                breakTimer.Enabled = true;
+                log("Starting quick break timers.");
+                quickBreakTimer.Start();
+                quickBreakResetTimer.Start();
             }
         }
 
 
+        // stop break timers
+        public void stopBTimers()
+        {
+            log("Stopping break timers.");
+            breakTimer.Stop();
+            breakResetTimer.Stop();
+        }
+
+
+        // start break timers
+        public void startBTimers()
+        {
+            if (enabled)
+            {
+                log("Starting quick break timers.");
+                breakTimer.Start();
+                breakResetTimer.Start();
+            }
+        }
+
+        private void quickBreakResetTimer_Tick(object sender, EventArgs e)
+        {
+            int idleTime = IdleTimeHelper.getIdleTime();
+            if (idleTime > quickBreakDuration)
+            {
+                log("Quick break timer reset due to idling.");
+                quickBreakTimer.Stop();
+                quickBreakTimer.Start();
+            }
+        }
+
+        private void breakResetTimer_Tick(object sender, EventArgs e)
+        {
+            int idleTime = IdleTimeHelper.getIdleTime();
+            if (idleTime > breakDuration)
+            {
+                log("Break timer reset due to idling.");
+                breakTimer.Stop();
+                breakTimer.Start();
+            }
+        }
+
+
+
+        internal void writeProgess(ProgressBar progressBar)
+        {
+            progressBar.Refresh();
+            using (Graphics gr = progressBar.CreateGraphics())
+            {
+                String s = progressBar.Value.ToString() + "/" + progressBar.Maximum.ToString();
+                gr.DrawString(s,
+                    SystemFonts.DefaultFont,
+                    Brushes.Black,
+                    new PointF(progressBar.Width / 2 - (gr.MeasureString(s,
+                        SystemFonts.DefaultFont).Width / 2.0F),
+                    progressBar.Height / 2 - (gr.MeasureString(s,
+                        SystemFonts.DefaultFont).Height / 2.0F)));
+            }
+            //progressBar.Refresh();
+            //progressBar.CreateGraphics().DrawString(progressBar.Value.ToString() + "/" +  progressBar.Maximum.ToString(), new Font("Arial", (float)8.25, FontStyle.Regular), Brushes.Black, new PointF(progressBar.Width / 2 - 10, progressBar.Height / 2 - 7));
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason != CloseReason.ApplicationExitCall)
+            {
+                e.Cancel = true; // this cancels the close event.
+                Hide();
+            }
+        }
     }
 }

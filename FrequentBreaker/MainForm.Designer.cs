@@ -31,14 +31,15 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.quickBreakTimer = new System.Windows.Forms.Timer(this.components);
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.disableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.quickBreakResetTimer = new System.Windows.Forms.Timer(this.components);
             this.showMainToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.quickBreakTimer = new System.Windows.Forms.Timer(this.components);
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.quickBreakResetTimer = new System.Windows.Forms.Timer(this.components);
             this.breakTimer = new System.Windows.Forms.Timer(this.components);
+            this.breakResetTimer = new System.Windows.Forms.Timer(this.components);
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,18 +49,6 @@
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "notifyIcon1";
             this.notifyIcon1.Visible = true;
-            // 
-            // quickBreakTimer
-            // 
-            this.quickBreakTimer.Tick += new System.EventHandler(this.quickBreakTimer_Tick);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(13, 12);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(259, 238);
-            this.textBox1.TabIndex = 0;
             // 
             // contextMenuStrip1
             // 
@@ -84,10 +73,6 @@
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
-            // quickBreakResetTimer
-            // 
-            this.quickBreakResetTimer.Interval = 1000;
-            // 
             // showMainToolStripMenuItem
             // 
             this.showMainToolStripMenuItem.Name = "showMainToolStripMenuItem";
@@ -95,9 +80,34 @@
             this.showMainToolStripMenuItem.Text = "Show Main";
             this.showMainToolStripMenuItem.Click += new System.EventHandler(this.showMainToolStripMenuItem_Click);
             // 
+            // quickBreakTimer
+            // 
+            this.quickBreakTimer.Tick += new System.EventHandler(this.quickBreakTimer_Tick);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox1.Location = new System.Drawing.Point(0, 0);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(284, 262);
+            this.textBox1.TabIndex = 0;
+            // 
+            // quickBreakResetTimer
+            // 
+            this.quickBreakResetTimer.Interval = 1000;
+            this.quickBreakResetTimer.Tick += new System.EventHandler(this.quickBreakResetTimer_Tick);
+            // 
             // breakTimer
             // 
             this.breakTimer.Tick += new System.EventHandler(this.breakTimer_Tick);
+            // 
+            // breakResetTimer
+            // 
+            this.breakResetTimer.Interval = 1000;
+            this.breakResetTimer.Tick += new System.EventHandler(this.breakResetTimer_Tick);
             // 
             // MainForm
             // 
@@ -106,7 +116,8 @@
             this.ClientSize = new System.Drawing.Size(284, 262);
             this.Controls.Add(this.textBox1);
             this.Name = "MainForm";
-            this.Text = "Form1";
+            this.Text = "Frequent Braker";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Resize += new System.EventHandler(this.Form1_Resize);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -125,6 +136,7 @@
         private System.Windows.Forms.Timer quickBreakResetTimer;
         private System.Windows.Forms.ToolStripMenuItem showMainToolStripMenuItem;
         private System.Windows.Forms.Timer breakTimer;
+        private System.Windows.Forms.Timer breakResetTimer;
     }
 }
 

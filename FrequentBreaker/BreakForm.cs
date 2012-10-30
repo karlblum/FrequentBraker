@@ -35,13 +35,14 @@ namespace FrequentBreaker
             if (progressBar.Value == progressBar.Maximum)
             {
                 parent.log("Break complete.");
-                parent.resume();
+                parent.startQBTimers();
+                parent.startBTimers();
                 progressTimer.Stop();
                 this.Hide();
             }
 
             progressBar.PerformStep();
-            label1.Text = progressBar.Value + "/" + progressBar.Maximum;
+            parent.writeProgess(progressBar);
   
         }
 
@@ -50,7 +51,8 @@ namespace FrequentBreaker
         {
             parent.log("Break skipped.");
             progressTimer.Stop();
-            parent.resume();
+            parent.startQBTimers();
+            parent.startBTimers();
             this.Hide();
         }
 
@@ -71,20 +73,21 @@ namespace FrequentBreaker
         {
             parent.log("Attmpting to start break.");
             this.progressBar.Value = 0;
-            this.label1.Text = "" + progressBar.Maximum;
+            parent.writeProgess(progressBar);
             this.Show();
-            qbIdleChecker.Start();
+            idleChecker.Start();
         }
 
 
-        private void qbIdleChecker_Tick(object sender, EventArgs e)
+
+        private void idleChecker_Tick(object sender, EventArgs e)
         {
             int idleTime = IdleTimeHelper.getIdleTime();
             parent.log("Idle time:" + idleTime + ".");
             if (idleTime > parent.idleBeforeBreak)
             {
                 this.progressTimer.Start();
-                qbIdleChecker.Stop();
+                idleChecker.Stop();
             }
         }
     }

@@ -30,18 +30,19 @@ namespace FrequentBreaker
             progressBar.Maximum = parent.quickBreakDuration / progressTimer.Interval;
         }
 
+
+        // Perform quick break step and finish if time runs out
         private void progressTimer_Tick(object sender, EventArgs e)
         {
             if (progressBar.Value == progressBar.Maximum)
             {
                 parent.log("Quick break complete.");
-                parent.resume();
+                parent.startQBTimers();
                 progressTimer.Stop();
                 this.Hide();
             }
-
             progressBar.PerformStep();
-            label1.Text = progressBar.Value + "/" + progressBar.Maximum;
+            parent.writeProgess(progressBar);
   
         }
 
@@ -50,7 +51,7 @@ namespace FrequentBreaker
         {
             parent.log("Quick break skipped.");
             progressTimer.Stop();
-            parent.resume();
+            parent.startQBTimers();
             this.Hide();
         }
 
@@ -71,7 +72,6 @@ namespace FrequentBreaker
         {
             parent.log("Attmpting to start quick break.");
             this.progressBar.Value = 0;
-            this.label1.Text = "" + progressBar.Maximum;
             this.Show();
             qbIdleChecker.Start();
         }
@@ -84,8 +84,10 @@ namespace FrequentBreaker
             if (idleTime > parent.idleBeforeBreak)
             {
                 this.progressTimer.Start();
+                parent.writeProgess(progressBar);
                 qbIdleChecker.Stop();
             }
+            
         }
     }
 }
