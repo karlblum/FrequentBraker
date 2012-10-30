@@ -92,6 +92,7 @@
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Quick break";
+            this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.QuickBreakForm_FormClosing);
             this.ResumeLayout(false);
 

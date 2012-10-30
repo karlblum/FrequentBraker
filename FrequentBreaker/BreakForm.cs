@@ -83,7 +83,6 @@ namespace FrequentBreaker
         private void idleChecker_Tick(object sender, EventArgs e)
         {
             int idleTime = IdleTimeHelper.getIdleTime();
-            parent.log("Idle time:" + idleTime + ".");
             if (idleTime > parent.idleBeforeBreak)
             {
                 this.progressTimer.Start();
