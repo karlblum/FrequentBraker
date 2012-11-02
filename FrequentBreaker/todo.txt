@@ -1,3 +1,6 @@
-﻿* break windows on top
-* break timer does not show on progress bar correctly
-* 
+﻿* break timer does not show on progress bar correctly
+* Cannot show next break/qb times
+* Exit sometimes does not work
+* Disabling from break window does not work properly
+* Add breaks counter and statistics
+* Implement postpone functionality

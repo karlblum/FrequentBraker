@@ -19,7 +19,7 @@ namespace FrequentBreaker
         private DateTime naturalBreakStarted;
 
         public int quickBreakDuration = 60 * 1000; // milliseconds
-        private int quickBreakInterval = 12 * 60 * 1000; // milliseconds
+        private int quickBreakInterval = 15 * 60 * 1000; // milliseconds
 
         public int breakDuration = 10 * 60 * 1000; // milliseconds
         private int breakInterval = 55 * 60 * 1000;// milliseconds
@@ -67,7 +67,7 @@ namespace FrequentBreaker
 
         public void log(string s)
         {
-            textBox1.AppendText(DateTime.Now.ToString("HH:mm:ss") + " " + s + "\r\n");
+            textBox1.AppendText("[" + DateTime.Now.ToString("yyyy.MM.dd - HH:mm:ss") + "] " + s + "\r\n");
         }
 
         private void disableToolStripMenuItem_Click(object sender, EventArgs e)
@@ -103,9 +103,9 @@ namespace FrequentBreaker
             log("Enabling system.");
             enabled = true;
             quickBreakTimer.Start();
-            resetTimer.Start();
+            naturalBreakTimer.Start();
             breakTimer.Start();
-            resetTimer.Start();
+            naturalBreakTimer.Start();
         }
 
         // disable breaking
@@ -114,9 +114,9 @@ namespace FrequentBreaker
             log("Disabling system.");
             enabled = false;
             quickBreakTimer.Stop();
-            resetTimer.Stop();
+            naturalBreakTimer.Stop();
             breakTimer.Stop();
-            resetTimer.Stop();
+            naturalBreakTimer.Stop();
         }
 
 
@@ -125,7 +125,7 @@ namespace FrequentBreaker
         {
             log("Stopping quick break timers.");
             quickBreakTimer.Stop();
-            resetTimer.Stop();
+            naturalBreakTimer.Stop();
         }
 
 
@@ -136,7 +136,7 @@ namespace FrequentBreaker
             {
                 log("Starting quick break timers.");
                 quickBreakTimer.Start();
-                resetTimer.Start();
+                naturalBreakTimer.Start();
             }
         }
 
@@ -146,7 +146,7 @@ namespace FrequentBreaker
         {
             log("Stopping break timers.");
             breakTimer.Stop();
-            resetTimer.Stop();
+            naturalBreakTimer.Stop();
         }
 
 
@@ -157,56 +157,72 @@ namespace FrequentBreaker
             {
                 log("Starting quick break timers.");
                 breakTimer.Start();
-                resetTimer.Start();
+                naturalBreakTimer.Start();
             }
         }
 
-        private void resetTimer_Tick(object sender, EventArgs e)
+        private void naturalBreakTimer_Tick(object sender, EventArgs e)
         {
             // current idle time
             int idleTime = IdleTimeHelper.getIdleTime();
 
+            
 
             /* Check if we have a natural quick break. 
              * If we have a natural quick break, then we have to stop the quick break timer, 
              * because idle time already exceeds the quick break time. 
              * This does not affect the break timer. 
              */
-            if (idleTime > quickBreakDuration && !naturalQuickBreak)
+            if (idleTime >= quickBreakDuration && !naturalQuickBreak && !naturalBreak)
             {
-                log("Natural quick break started.");
+                log("Natural break started.");
                 naturalQuickBreak = true;
                 naturalQuickBreakStarted = DateTime.Now;
+                log("Stoping quick break timer.");
                 quickBreakTimer.Stop();
             }
             // if natural quick break has ended
             else if (idleTime < quickBreakDuration && naturalQuickBreak)
             {
-                int d = (DateTime.Now - naturalQuickBreakStarted).Minutes + quickBreakDuration / (60 * 1000);
-                log("Natural quick break ended in " + d + " minutes.");
+                double d = (DateTime.Now - naturalQuickBreakStarted).TotalMinutes + quickBreakDuration / (60 * 1000);
+                d = Math.Round(d, 0);
+                log("Natural quick break (" + d + " min).");
                 naturalQuickBreak = false;
-                breakTimer.Start();
+                log("Starting quick break timer.");
+                quickBreakTimer.Start();
             }
 
             /* Check if we have a natural break. 
              * If we have a natural break, then we have to stop the break timer. 
              * The quick break timer has already stopped because we assume 
              * that the quick break is always shorter than this break. */
-            if (idleTime > breakDuration && !naturalBreak)
+            if (idleTime >= breakDuration && !naturalBreak)
             {
-                log("Natural break started");
                 naturalBreak = true;
+                naturalQuickBreak = false; // We now have a natural break and we don't care about natural quick break.
                 naturalBreakStarted = DateTime.Now;
+                log("Stoping break timer.");
                 breakTimer.Stop();
             }
-            // if natural break has ended
-            else if (idleTime < quickBreakDuration && naturalQuickBreak)
+            // if natural break has ended, then start both break timers
+            else if (idleTime < breakDuration && naturalBreak)
             {
-                int d2 = (DateTime.Now - naturalBreakStarted).Minutes + breakDuration / (60 * 1000);
-                log("Natural break ended in " + d2 + " minutes.");
+                double d2 = (DateTime.Now - naturalBreakStarted).TotalMinutes + breakDuration / (60 * 1000);
+                d2 = Math.Round(d2, 0);
+                log("Natural break (" + d2 + " min).");
                 naturalBreak = false;
+
+                log("Starting break timer.");
                 breakTimer.Start();
+                log("Starting quick break timer.");
+                quickBreakTimer.Start();
             }
+
+
+
+            txtbIdleTime.Text = (idleTime / 1000).ToString();
+            txtbBreakTimerStatus.Text = breakTimer.Enabled.ToString();
+            txtbQuickBreakTimerStatus.Text = quickBreakTimer.Enabled.ToString();
         }
 
 
@@ -234,6 +250,15 @@ namespace FrequentBreaker
             {
                 e.Cancel = true; // this cancels the close event.
                 Hide();
+            }
+        }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                Show();
+                WindowState = FormWindowState.Normal;
             }
         }
     }
