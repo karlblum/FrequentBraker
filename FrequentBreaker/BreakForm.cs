@@ -26,17 +26,16 @@ namespace FrequentBreaker
             this.Location = new Point((r.Width + r.X) - this.Width, (r.Height + r.Y) - this.Height);
             
             this.parent = parentForm;
-            
-            progressBar.Maximum = parent.breakDuration / progressTimer.Interval;
+            double max = parent.breakLength.TotalMilliseconds / progressTimer.Interval;
+            progressBar.Maximum = Convert.ToInt32(max);
         }
 
         private void progressTimer_Tick(object sender, EventArgs e)
         {
             if (progressBar.Value == progressBar.Maximum)
             {
+                parent.s.NextBreak = DateTime.Now + parent.timeBetweenBreaks;
                 parent.log("Break complete.");
-                parent.startQBTimers();
-                parent.startBTimers();
                 progressTimer.Stop();
                 this.Hide();
             }
@@ -50,9 +49,8 @@ namespace FrequentBreaker
         private void btnSkip_Click(object sender, EventArgs e)
         {
             parent.log("Break skipped.");
+            parent.s.NextBreak = DateTime.Now + parent.timeBetweenBreaks;
             progressTimer.Stop();
-            parent.startQBTimers();
-            parent.startBTimers();
             this.Hide();
         }
 
@@ -88,6 +86,14 @@ namespace FrequentBreaker
                 this.progressTimer.Start();
                 idleChecker.Stop();
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            parent.log("Break postponed.");
+            parent.s.NextBreak = DateTime.Now + parent.postponeLength;
+            progressTimer.Stop();
+            this.Hide();
         }
     }
 }

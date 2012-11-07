@@ -26,8 +26,9 @@ namespace FrequentBreaker
             this.Location = new Point((r.Width + r.X) - this.Width, (r.Height + r.Y) - this.Height);
             
             this.parent = parentForm;
-            
-            progressBar.Maximum = parent.quickBreakDuration / progressTimer.Interval;
+
+            double max = parent.quickBreakLength.TotalMilliseconds / progressTimer.Interval;
+            progressBar.Maximum = Convert.ToInt32(max);
         }
 
 
@@ -36,8 +37,9 @@ namespace FrequentBreaker
         {
             if (progressBar.Value == progressBar.Maximum)
             {
+                parent.s.PrevQuickBreakCompleted = DateTime.Now;
+                parent.s.NextQuickBreak = DateTime.Now + parent.timeBetweenQuickBreaks;
                 parent.log("Quick break complete.");
-                parent.startQBTimers();
                 progressTimer.Stop();
                 this.Hide();
             }
@@ -51,7 +53,6 @@ namespace FrequentBreaker
         {
             parent.log("Quick break skipped.");
             progressTimer.Stop();
-            parent.startQBTimers();
             this.Hide();
         }
 
